@@ -1,0 +1,40 @@
+// Erzeugt assets.ts, mazes.ts und sounds.ts mit dem Arcade Asset Generator. Aufruf: node tools/build-assets.js
+const fs = require('fs'), path = require('path');
+const G = require('../../generator/assetgen.js');
+const S = require('../../generator/soundgen.js');
+const C = require('./config.js');
+const cap = s => s[0].toUpperCase() + s.slice(1);
+const KEYS = ['floor', 'wall', 'dot', 'power', 'start', 'house'];
+let ts = '// AUTOMATISCH ERZEUGT von tools/build-assets.js – nicht von Hand bearbeiten.\nnamespace mazeGfx {\n';
+ts += G.imageToTS('empty8', new G.Pix(8, 8));
+const sets = [];
+C.styles.forEach(st => {
+    const t = G.mazeTiles(st, '1');
+    KEYS.forEach(k => ts += G.imageToTS('t' + cap(st) + cap(k), t[k]));
+    sets.push('[empty8, ' + KEYS.map(k => 't' + cap(st) + cap(k)).join(', ') + ']');
+});
+ts += `    // Reihenfolge: leer, Boden, Wand, Punkt, Kraftpille, Start, Geisterhaus\n    export const tilesets: Image[][] = [${sets.join(', ')}]\n`;
+C.heroColors.forEach((c, i) => ts += G.framesToTS('hero' + (i + 1), G.mazeHero(c)));
+ts += '    export const heroes: Image[][] = [hero1, hero2, hero3, hero4]\n';
+C.ghostColors.forEach((c, i) => { const g = G.mazeGhost(c); ts += G.framesToTS('ghost' + (i + 1), g.walk); });
+ts += '    export const ghosts: Image[][] = [ghost1, ghost2, ghost3, ghost4]\n';
+const g0 = G.mazeGhost(2);
+ts += G.framesToTS('scared', g0.scared) + G.imageToTS('blink', g0.blink) + G.imageToTS('eyes', g0.eyes) + '}\n';
+fs.writeFileSync(path.join(__dirname, '../assets.ts'), ts);
+const CH = { ' ': 1, '#': 2, '.': 3, 'o': 4, 'P': 5, 'G': 6 };
+let mz = '// AUTOMATISCH ERZEUGT von tools/build-assets.js.\nnamespace mazeLevels {\n    export const count = ' + C.mazes.length + '\n';
+mz += '    export const names: string[] = [' + C.mazes.map(m => JSON.stringify(m.name)).join(', ') + ']\n';
+mz += '    export const styles: number[] = [' + C.mazes.map(m => C.styles.indexOf(m.style)).join(', ') + ']\n';
+mz += '    export function tilemap(i: number): tiles.TileMapData {\n        switch (i) {\n';
+C.mazes.forEach((m, i) => {
+    const rows = G.generateMaze(m.seed), bytes = [20, 0, 15, 0], walls = [];
+    rows.forEach(r => { const wr = []; [...r].forEach(c => { bytes.push(CH[c]); wr.push(c === '#' ? '2' : '.'); }); walls.push('            ' + wr.join(' ')); });
+    mz += `            case ${i}: return tiles.createTilemap(hex\`${Buffer.from(bytes).toString('hex')}\`, img\`\n${walls.join('\n')}\n            \`, mazeGfx.tilesets[${C.styles.indexOf(m.style)}], TileScale.Eight)\n`;
+});
+mz += '        }\n        return null\n    }\n}\n';
+fs.writeFileSync(path.join(__dirname, '../mazes.ts'), mz);
+let snd = '// AUTOMATISCH ERZEUGT von tools/build-assets.js – Sounds in tools/config.js ändern.\nnamespace mazeSounds {\n';
+for (const k in C.sfx) snd += S.sfxToTS(k, S.sfx(C.sfx[k][0], C.sfx[k][1]));
+for (const k in C.melodies) snd += S.melodyToTS(k, S.melody(C.melodies[k][0], C.melodies[k][1]));
+fs.writeFileSync(path.join(__dirname, '../sounds.ts'), snd + '}\n');
+console.log('assets.ts', Math.round(ts.length / 1024) + ' KB, mazes.ts, sounds.ts');

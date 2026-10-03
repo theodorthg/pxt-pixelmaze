@@ -1,0 +1,9 @@
+# MakeCode / pxt
+built/
+pxt_modules/
+node_modules/
+.header.json
+_history
+.simstate.json
+*.tgz
+__pycache__/
