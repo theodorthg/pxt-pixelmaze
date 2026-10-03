@@ -1,6 +1,6 @@
 {
     "name": "pixelmaze",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Pixel-Maze: Labyrinth-Spiel wie Pac-Man für 1 bis 4 Spieler mit vier Geistern",
     "dependencies": {
         "device": "*"
@@ -10,6 +10,7 @@
         "assets.ts",
         "mazes.ts",
         "sounds.ts",
+        "palettes.ts",
         "engine.ts"
     ],
     "testFiles": [

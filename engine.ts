@@ -85,6 +85,11 @@ namespace pixelmaze {
         }
     }
     function play(p: music.Playable) { music.play(p, music.PlaybackMode.InBackground) }
+    // Paletten je Stil (palettes.ts): beim Laden wird die Palette des Stils gesetzt
+    let stylePalettes = true
+    function applyPalette(s: number) {
+        if (stylePalettes && s >= 0 && s < mzPalettes.list.length) image.setPalette(mzPalettes.list[s])
+    }
 
     // ---------------------------------------------------------------- Labyrinthe
     function mazeMap(i: number): tiles.TileMapData {
@@ -171,6 +176,7 @@ namespace pixelmaze {
 
     function loadMaze(i: number) {
         maze = i
+        applyPalette(mazeStyles[i] >= 0 ? mazeStyles[i] : (i < mazeLevels.count ? mazeLevels.styles[i] : 0))
         tiles.setCurrentTilemap(mazeMap(i))
         scene.setBackgroundColor(15)
         const data = game.currentScene().tileMap.data
@@ -608,4 +614,13 @@ namespace pixelmaze {
     //% blockId=mz_current block="aktuelles Labyrinth"
     //% group="Werte" weight=80
     export function currentMaze(): number { return maze + 1 }
+
+    /**
+     * Jeder Stil bringt seine eigene 16-Farben-Palette mit (z. B. Blautöne im Meer, Glut in der Lavahöhle).
+     * Aus: das Spiel nutzt die Palette des Projekts.
+     */
+    //% blockId=mz_palettes block="Stil-Paletten $on"
+    //% on.shadow=toggleOnOff on.defl=true
+    //% group="Einstellungen" weight=10
+    export function useStylePalettes(on: boolean) { stylePalettes = on }
 }

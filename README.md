@@ -22,3 +22,7 @@ Kacheln je Stil (`Neon`, `Candy`, `Hedge`): `mzNeonFloor`, `mzNeonWall`, `mzNeon
 Geister `mzGhost1` … `mzGhost4`, `mzScared`, `mzBlink`, `mzEyes`.
 
 Einbinden: Erweiterungen → `github:theodorthg/pxt-pixelmaze`. Lizenz: MIT.
+
+## Stil-Paletten (ab v0.2.0)
+
+Jeder Stil bringt eine eigene 16-Farben-Palette mit; sie wird beim Laden gesetzt. Weiß, Rot, Gelb, Beige, Braun und Schwarz bleiben gleich. Abschalten mit dem Block „Stil-Paletten aus“ (`pixelmaze.useStylePalettes(false)`), dann gilt die Palette des Projekts. Farben: `generator/assetgen.js` (GENRE_PALETTES), neu erzeugen mit `node tools/build-palettes.js`.
